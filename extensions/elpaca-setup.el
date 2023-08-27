@@ -86,13 +86,11 @@ This will help when chaining `:elpaca' with other `setup' constructs, such as `:
 					      (elpaca-setup--find-orders name))))
 			     (and ,use-elpaca-by-default (list (elpaca-setup--extract-feat name)))))
 		 (body `(elpaca ,(car orders)
-				(elpaca-setup--initial-setup-definition ,(elpaca-setup--extract-feat name) ; now use setup again for expanding body, but don't re-evaluate name again
-									,@body))))
+				(elpaca-setup--initial-setup-definition ,name ,@body))))
 	   (progn
 	     (dolist (order (cdr orders))
 	       (setq body `(elpaca ,order ,body)))
-	     `(elpaca-setup--initial-setup-definition ,name ; setup short-circuit may occur
-						      ,body))
+	     ,body)
 	 `(elpaca-setup--initial-setup-definition ,name ,@body))) ; no :elpaca, normal setup
 
      (put #'setup 'function-documentation (advice--make-docstring 'elpaca-setup--initial-setup-definition))))
