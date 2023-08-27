@@ -37,7 +37,7 @@
     (while lst
       (if (and (consp (car lst))
 	       (eq (caar lst) :elpaca))
-	  (if (null (car (cadar lst)))
+	  (if (and (consp (cadar lst)) (null (car (cadar lst))))
 	      (push nil orders)
 	    (push (cdar lst) orders)))
       (setq lst (cdr lst)))
