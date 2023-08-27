@@ -90,7 +90,7 @@ This will help when chaining `:elpaca' with other `setup' constructs, such as `:
 	   (progn
 	     (dolist (order (cdr orders))
 	       (setq body `(elpaca ,order ,body)))
-	     ,body)
+	     body)
 	 `(elpaca-setup--initial-setup-definition ,name ,@body))) ; no :elpaca, normal setup
 
      (put #'setup 'function-documentation (advice--make-docstring 'elpaca-setup--initial-setup-definition))))
