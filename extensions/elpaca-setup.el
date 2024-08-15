@@ -52,9 +52,9 @@
 
 ;;;###autoload
 (defmacro elpaca-setup-integrate (use-elpaca-by-default)
-  "Add `elpaca' support to `setup'.
+  "Add `elpaca' support to `setup' with a new macro `setup-pkg'.
 If USE-ELPACA-BY-DEFAULT is t, then target feature in NAME of
-`setup' will be used as ORDER to `elpaca' by appropriate
+`setup-pkg' will be used as ORDER to `elpaca' by appropriate
 shorthand of NAME unless there is no `:elpaca' call.
 
 If there are multiple `:elpaca' calls, then their `elpaca' ORDER
@@ -69,16 +69,13 @@ definition will be in use under different name.  So you should
 call `elpaca-setup-integrate' after user customizations to
 definition of `setup', such as advises."
   `(progn
-     (fset 'elpaca-setup--initial-setup-definition (symbol-function #'setup))
-     (put 'elpaca-setup--initial-setup-definition 'lisp-indent-function 1)
-     
      (setup-define :elpaca
        (lambda (&rest _) t)
        :documentation "A placeholder SETUP macro that evaluates to t.
 This will help when chaining `:elpaca' with other `setup' constructs, such as `:and'."
        :shorthand #'elpaca-setup--shorthand)
 
-     (defmacro setup (name &rest body)
+     (defmacro setup-pkg (name &rest body)
        (declare (indent 1))
        (if-let* ((orders (or (append (elpaca-setup--find-orders body)
 				     (and (consp name)
@@ -86,21 +83,20 @@ This will help when chaining `:elpaca' with other `setup' constructs, such as `:
 					      (elpaca-setup--find-orders name))))
 			     (and ,use-elpaca-by-default (list (elpaca-setup--extract-feat name)))))
 		 (body `(elpaca ,(car orders)
-				(elpaca-setup--initial-setup-definition ,name ,@body))))
+				(setup ,name ,@body))))
 	   (progn
 	     (dolist (order (cdr orders))
 	       (setq body `(elpaca ,order ,body)))
 	     body)
-	 `(elpaca-setup--initial-setup-definition ,name ,@body))) ; no :elpaca, normal setup
+	 `(setup ,name ,@body))) ; no :elpaca, normal setup
 
-     (put #'setup 'function-documentation (advice--make-docstring 'elpaca-setup--initial-setup-definition))))
+     (put #'setup-pkg 'function-documentation (advice--make-docstring 'setup))))
 
 ;;;###autoload
 (defun elpaca-setup-teardown ()
   "Remove `elpaca' support from `setup'.
 Note that `setup' definition will be restored to the one when
 `elpaca-setup-integrate' is called."
-  (fset 'setup #'elpaca-setup--initial-setup-definition)
   (setq setup-macros (assoc-delete-all :elpaca setup-macros)))
 
 
